@@ -20,7 +20,7 @@ export function Review({ data, nextStep, prevStep }: Props) {
         <ReviewRow label="Target Cloud" value="Google Cloud Platform" />
         <ReviewRow label="Project ID" value={data.gcpProjectId} />
         <ReviewRow label="Auth Method" value="Short-Lived Access Token (Provided)" />
-        <ReviewRow label="Compute Engine" value="e2-standard-2 (Ubuntu VM)" />
+        <ReviewRow label="Compute Engine" value="e2-standard-8 (Heavy Workload VM)" />
         <ReviewRow label="Region" value="us-central1-a (Auto-selected)" />
         <ReviewRow label="LLM Provider" value={data.llmProvider.toUpperCase()} />
         <ReviewRow label="Safety Confirms" value={data.confirmationMode ? 'Enabled' : 'Disabled'} />

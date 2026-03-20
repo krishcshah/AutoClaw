@@ -30,7 +30,7 @@ echo "Starting OpenClaw Initialization..."
 echo "Installing Node.js 22 and dependencies..."
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get update
-sudo apt-get install -y nodejs git curl docker.io
+sudo apt-get install -y nodejs git curl docker.io chromium-browser chromium-chromedriver fonts-freefont-ttf xvfb
 
 echo "Installing process manager and pnpm..."
 sudo npm install -g pnpm pm2
@@ -62,14 +62,14 @@ echo "OpenClaw VM initialization complete."
 
     const instanceResource = {
       name: instanceName,
-      machineType: `zones/${zone}/machineTypes/e2-standard-2`,
+      machineType: `zones/${zone}/machineTypes/e2-standard-8`,
       disks: [
         {
           boot: true,
           autoDelete: true,
           initializeParams: {
             sourceImage: 'projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts',
-            diskSizeGb: '30'
+            diskSizeGb: '100'
           }
         }
       ],
