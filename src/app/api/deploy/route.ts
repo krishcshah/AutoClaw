@@ -9,19 +9,20 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
 
-    if (!data.gcpProjectId || !data.telegramToken) {
+    if (!data.gcpProjectId || !data.telegramToken || !data.gcpAccessToken) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // 1. Authenticate using Application Default Credentials (ADC)
-    // The google-cloud SDK automatically uses your local ADC config 
-    // configured via `gcloud auth application-default login`
-    
+    // 1. Authenticate using the provided short-lived OAuth access token
     // In a full production scenario, we would initialize the GCP clients like this:
-    // const authOptions = { projectId: data.gcpProjectId };
-    // const runClient = new ServicesClient(authOptions);
-    // const serviceUsageClient = new ServiceUsageClient(authOptions);
-    // const iamClient = new IAMClient(authOptions);
+    // const { OAuth2Client } = require('google-auth-library');
+    // const authClient = new OAuth2Client();
+    // authClient.setCredentials({ access_token: data.gcpAccessToken });
+    // const options = { projectId: data.gcpProjectId, authClient };
+    
+    // const runClient = new ServicesClient(options);
+    // const serviceUsageClient = new ServiceUsageClient(options);
+    // const iamClient = new IAMClient(options);
 
     // 2. Enable necessary APIs (Cloud Run)
     // await serviceUsageClient.enableService({

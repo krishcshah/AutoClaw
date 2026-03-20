@@ -19,6 +19,7 @@ export function Review({ data, nextStep, prevStep }: Props) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <ReviewRow label="Target Cloud" value="Google Cloud Platform" />
         <ReviewRow label="Project ID" value={data.gcpProjectId} />
+        <ReviewRow label="Auth Method" value="Short-Lived Access Token (Provided)" />
         <ReviewRow label="Compute Engine" value="Cloud Run (Managed)" />
         <ReviewRow label="Region" value="us-central1 (Auto-selected)" />
         <ReviewRow label="LLM Provider" value={data.llmProvider.toUpperCase()} />

@@ -10,6 +10,7 @@ import { DeployStatus } from './steps/DeployStatus';
 
 export type WizardData = {
   gcpProjectId: string;
+  gcpAccessToken: string;
   llmProvider: 'openai' | 'anthropic' | 'gemini';
   llmApiKey: string;
   telegramToken: string;
@@ -27,6 +28,7 @@ export function Wizard() {
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<WizardData>({
     gcpProjectId: '',
+    gcpAccessToken: '',
     llmProvider: 'openai',
     llmApiKey: '',
     telegramToken: '',
