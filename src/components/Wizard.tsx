@@ -14,6 +14,7 @@ export type WizardData = {
   llmProvider: 'openai' | 'anthropic' | 'gemini';
   llmApiKey: string;
   telegramToken: string;
+  confirmationMode: boolean;
 };
 
 const STEPS = [
@@ -32,6 +33,7 @@ export function Wizard() {
     llmProvider: 'openai',
     llmApiKey: '',
     telegramToken: '',
+    confirmationMode: true,
   });
 
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1));

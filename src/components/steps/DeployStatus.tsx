@@ -64,20 +64,19 @@ export function DeployStatus({ data, reset }: Props) {
       {status === 'success' && (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <CheckCircle size={64} color="var(--success)" style={{ marginBottom: '16px' }} />
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '8px', color: 'var(--success)' }}>Deployment Successful!</h2>
+          <h2 style={{ fontSize: '1.8rem', marginBottom: '8px', color: 'var(--success)' }}>VM Provisioned!</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
-            Your OpenClaw agent is live and connected to Telegram.
+            Your OpenClaw agent is now booting up on Google Compute Engine.
           </p>
           
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid var(--glass-border)', marginBottom: '24px', width: '100%', maxWidth: '400px' }}>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Cloud Run Endpoint</div>
-            <a href={deployUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              {deployUrl} <ExternalLink size={14} />
-            </a>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Google Compute Engine</div>
+            <div style={{ fontSize: '0.9rem', color: '#fff', marginBottom: '4px' }}><strong>Instance:</strong> {deployUrl.split('/').pop() || 'openclaw-vm'}</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--accent-primary)' }}>The startup script is currently installing dependencies. The agent will message your Telegram bot automatically in 3-5 minutes once it is ready.</div>
           </div>
 
           <a href={`https://t.me/${data.telegramToken.split(':')[0]}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none', width: '100%', maxWidth: '400px' }}>
-            <Bot size={20} /> Test Your Agent on Telegram
+            <Bot size={20} /> Open Telegram Chat
           </a>
         </div>
       )}

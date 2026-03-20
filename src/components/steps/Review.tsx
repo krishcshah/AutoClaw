@@ -13,17 +13,18 @@ export function Review({ data, nextStep, prevStep }: Props) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <h2 style={{ fontSize: '1.5rem', color: '#fff' }}>Review & Deploy</h2>
       <p style={{ marginBottom: '2rem' }}>
-        Please verify your configuration before deployment. Our automated system will provision the required resources on Cloud Run.
+        Please verify your configuration before deployment. Our automated system will provision an autonomous agent on a Google Compute Engine VM.
       </p>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <ReviewRow label="Target Cloud" value="Google Cloud Platform" />
         <ReviewRow label="Project ID" value={data.gcpProjectId} />
         <ReviewRow label="Auth Method" value="Short-Lived Access Token (Provided)" />
-        <ReviewRow label="Compute Engine" value="Cloud Run (Managed)" />
-        <ReviewRow label="Region" value="us-central1 (Auto-selected)" />
+        <ReviewRow label="Compute Engine" value="e2-standard-2 (Ubuntu VM)" />
+        <ReviewRow label="Region" value="us-central1-a (Auto-selected)" />
         <ReviewRow label="LLM Provider" value={data.llmProvider.toUpperCase()} />
-        <ReviewRow label="Telegram Integration" value="Enabled Configuration" />
+        <ReviewRow label="Safety Confirms" value={data.confirmationMode ? 'Enabled' : 'Disabled'} />
+        <ReviewRow label="Telegram Integration" value="Enabled (Outbound Listener)" />
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid var(--glass-border)' }}>

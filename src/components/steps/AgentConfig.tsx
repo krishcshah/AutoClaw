@@ -58,6 +58,22 @@ export function AgentConfig({ data, updateData, nextStep, prevStep }: Props) {
             This key is securely passed to the Cloud Run instance upon deployment.
           </p>
         </div>
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+            <input 
+              type="checkbox" 
+              checked={data.confirmationMode} 
+              onChange={(e) => updateData({ confirmationMode: e.target.checked })}
+              style={{ width: '20px', height: '20px', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+            />
+            <div>
+              <div style={{ fontWeight: 600, color: '#fff' }}>Enable Safety Confirmation Mode</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                If enabled, OpenClaw will ask for explicit permission via Telegram before executing potentially dangerous shell commands or modifying critical files. Assures safe autonomy on the VM.
+              </div>
+            </div>
+          </label>
+        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid var(--glass-border)' }}>

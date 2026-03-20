@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@google-cloud/compute": "^6.9.0",
     "@google-cloud/iam": "^2.3.1",
     "@google-cloud/resource-manager": "^6.2.1",
     "@google-cloud/run": "^3.2.0",

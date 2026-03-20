@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ServicesClient } from '@google-cloud/run';
-import { ServiceUsageClient } from '@google-cloud/service-usage';
+import compute from '@google-cloud/compute';
 import { OAuth2Client } from 'google-auth-library';
 
 export async function POST(req: NextRequest) {
@@ -11,90 +10,127 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    console.log(`Starting real deployment for ${data.gcpProjectId}...`);
+    console.log(`Starting GCE VM provisioning for ${data.gcpProjectId}...`);
 
-    // 1. Authenticate using the provided short-lived OAuth access token
+    // Authenticate using the provided short-lived OAuth access token
     const authClient = new OAuth2Client();
     authClient.setCredentials({ access_token: data.gcpAccessToken });
-    const options = { projectId: data.gcpProjectId, authClient };
     
-    // Initialize SDK Clients
-    const runClient = new ServicesClient(options);
-    const serviceUsageClient = new ServiceUsageClient(options);
+    // Initialize Compute Engine Client
+    const instancesClient = new compute.InstancesClient({ projectId: data.gcpProjectId, authClient });
 
-    // 2. Enable necessary APIs (Cloud Run)
-    console.log('Enabling Cloud Run API...');
-    try {
-      const [operation] = await serviceUsageClient.enableService({
-        name: `projects/${data.gcpProjectId}/services/run.googleapis.com`
-      });
-      await operation.promise();
-    } catch (e: any) {
-      console.warn('API may already be enabled or insufficient permissions:', e.message);
-    }
+    const zone = 'us-central1-a';
+    const instanceName = `openclaw-agent-${Math.floor(Math.random() * 100000)}`;
 
-    const parent = `projects/${data.gcpProjectId}/locations/us-central1`;
-    const serviceId = 'openclaw-agent-' + Math.floor(Math.random() * 10000);
+    // Build the robust startup script
+    const startupScript = `#!/bin/bash
+exec > /var/log/openclaw-startup.log 2>&1
+echo "Starting OpenClaw Initialization..."
+sudo apt-get update
+sudo apt-get install -y git curl python3 python3-pip python3-venv npm docker.io
 
-    // 3. Deploy OpenClaw container to Cloud Run (v2 API)
-    console.log('Provisioning Cloud Run Service...');
-    const [createOperation] = await runClient.createService({
-      parent,
-      serviceId,
-      service: {
-        template: {
-          containers: [{
-            image: 'ghcr.io/openclaw/openclaw:latest', // Assuming standard public image
-            env: [
-              { name: 'LLM_PROVIDER', value: data.llmProvider },
-              { name: 'LLM_API_KEY', value: data.llmApiKey },
-              { name: 'TELEGRAM_TOKEN', value: data.telegramToken },
-              { name: 'PORT', value: '8080' }
-            ],
-            resources: {
-              limits: { memory: '512Mi', cpu: '1' } // Smart default to balance cost/performance
-            }
-          }]
+echo "Installing process manager..."
+sudo npm install -g pm2
+
+echo "Cloning OpenClaw repository..."
+git clone https://github.com/khushaldas/openclaw.git /opt/openclaw
+cd /opt/openclaw
+
+echo "Writing environment configurations..."
+cat <<EOF > .env
+LLM_PROVIDER=${data.llmProvider}
+LLM_API_KEY=${data.llmApiKey}
+TELEGRAM_BOT_TOKEN=${data.telegramToken}
+CONFIRMATION_MODE=${data.confirmationMode}
+EOF
+
+echo "Installing agent dependencies..."
+# For Python-based agents
+if [ -f "requirements.txt" ]; then
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install -r requirements.txt
+  # Start via PM2 representing the python shim
+  pm2 start "python3 main.py" --name openclaw
+# For Node.js-based agents
+elif [ -f "package.json" ]; then
+  npm install
+  npm run build || true
+  pm2 start npm --name openclaw -- start
+else
+  # Fallback execution attempt
+  echo "Unknown project structure inside /opt/openclaw"
+fi
+
+echo "Saving process list so OpenClaw survives reboots..."
+pm2 save
+pm2 startup | tail -n 1 | bash
+
+echo "OpenClaw VM initialization complete."
+`;
+
+    const instanceResource = {
+      name: instanceName,
+      machineType: `zones/${zone}/machineTypes/e2-standard-2`,
+      disks: [
+        {
+          boot: true,
+          autoDelete: true,
+          initializeParams: {
+            sourceImage: 'projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts',
+            diskSizeGb: '30'
+          }
         }
-      }
-    });
-
-    const [serviceResponse] = await createOperation.promise();
-    const serviceUrl = serviceResponse.uri;
-
-    if (!serviceUrl) {
-      throw new Error('Deployment succeeded but no URI was returned by Cloud Run.');
-    }
-
-    // 4. Set IAM Policy to allow unauthenticated invocations (Telegram webhooks)
-    console.log('Making service public for webhook access...');
-    await runClient.setIamPolicy({
-      resource: serviceResponse.name,
-      policy: {
-        bindings: [
-          { role: 'roles/run.invoker', members: ['allUsers'] }
+      ],
+      networkInterfaces: [
+        {
+          network: 'global/networks/default',
+          accessConfigs: [
+            {
+              type: 'ONE_TO_ONE_NAT',
+              name: 'External NAT'
+            }
+          ]
+        }
+      ],
+      metadata: {
+        items: [
+          {
+            key: 'startup-script',
+            value: startupScript
+          }
         ]
-      }
+      },
+      // Give the VM minimal scopes, relying strictly on its own env keys for OpenClaw abilities 
+      // rather than giving the VM overarching cloud admin access automatically.
+      serviceAccounts: [
+        {
+          email: 'default',
+          scopes: ['https://www.googleapis.com/auth/devstorage.read_only']
+        }
+      ]
+    };
+
+    console.log('Sending insert request to Google Compute API...');
+    
+    const [response] = await instancesClient.insert({
+      instanceResource,
+      project: data.gcpProjectId,
+      zone,
     });
 
-    // 5. Connect Telegram (Webhook) to the new Cloud Run URL
-    console.log('Registering Telegram Webhook...');
-    const webhookRes = await fetch(`https://api.telegram.org/bot${data.telegramToken}/setWebhook?url=${serviceUrl}/webhook`);
-    const webhookData = await webhookRes.json();
-    if (!webhookData.ok) {
-      console.warn('Failed to register Telegram webhook:', webhookData.description);
-      // We don't throw here to ensure the user still gets the URL if the bot token is slightly misconfigured but infrastructure worked.
-    }
+    console.log('VM Insert operation created:', response.name);
 
-    console.log('Deployment completely successful. Target URL:', serviceUrl);
-    
+    // Provide the user with the generated instance link
+    const instanceUrl = `https://console.cloud.google.com/compute/instancesDetail/zones/${zone}/instances/${instanceName}?project=${data.gcpProjectId}`;
+
     return NextResponse.json({ 
       success: true, 
-      url: serviceUrl 
+      url: instanceUrl 
     });
 
   } catch (error: any) {
-    console.error('Deployment error:', error);
+    console.error('Compute Engine Provisioning error:', error);
     return NextResponse.json({ error: error.message || String(error) }, { status: 500 });
   }
 }
