@@ -72,11 +72,11 @@ export function DeployStatus({ data, reset }: Props) {
           <div style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid var(--glass-border)', marginBottom: '24px', width: '100%', maxWidth: '400px' }}>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Google Compute Engine</div>
             <div style={{ fontSize: '0.9rem', color: '#fff', marginBottom: '4px' }}><strong>Instance:</strong> {deployUrl.split('/').pop() || 'openclaw-vm'}</div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--accent-primary)' }}>The startup script is currently installing dependencies. The agent will message your Telegram bot automatically in 3-5 minutes once it is ready.</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--accent-primary)' }}>The startup script is installing dependencies in the background (takes ~3-5 minutes). <strong>You must message your bot first</strong> on Telegram to initiate the session, as bots cannot start conversations!</div>
           </div>
 
           <a href={`https://t.me/${data.telegramToken.split(':')[0]}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none', width: '100%', maxWidth: '400px' }}>
-            <Bot size={20} /> Open Telegram Chat
+            <Bot size={20} /> Open Telegram & Send Message
           </a>
         </div>
       )}
