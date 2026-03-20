@@ -75,7 +75,7 @@ export function DeployStatus({ data, reset }: Props) {
             <div style={{ fontSize: '0.85rem', color: 'var(--accent-primary)' }}>The startup script is installing dependencies in the background (takes ~3-5 minutes). <strong>You must message your bot first</strong> on Telegram to initiate the session, as bots cannot start conversations!</div>
           </div>
 
-          <a href={`https://t.me/${data.telegramToken.split(':')[0]}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none', width: '100%', maxWidth: '400px' }}>
+          <a href={`https://t.me/${data.telegramUsername}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none', width: '100%', maxWidth: '400px' }}>
             <Bot size={20} /> Open Telegram & Send Message
           </a>
         </div>

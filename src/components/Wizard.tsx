@@ -14,6 +14,7 @@ export type WizardData = {
   llmProvider: 'openai' | 'anthropic' | 'gemini';
   llmApiKey: string;
   telegramToken: string;
+  telegramUsername: string;
   confirmationMode: boolean;
 };
 
@@ -33,6 +34,7 @@ export function Wizard() {
     llmProvider: 'openai',
     llmApiKey: '',
     telegramToken: '',
+    telegramUsername: '',
     confirmationMode: true,
   });
 

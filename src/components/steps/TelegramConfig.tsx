@@ -44,7 +44,22 @@ export function TelegramConfig({ data, updateData, nextStep, prevStep }: Props) 
             value={data.telegramToken}
             onChange={(e) => updateData({ telegramToken: e.target.value })}
             autoComplete="new-password"
+            style={{ marginBottom: '16px' }}
           />
+
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-secondary)' }}>
+            Bot Username
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+            <span style={{ padding: '12px 16px', background: 'var(--bg-secondary)', borderRight: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontWeight: 600 }}>@</span>
+            <input 
+              type="text" 
+              placeholder="MyOpenClawBot"
+              value={data.telegramUsername}
+              onChange={(e) => updateData({ telegramUsername: e.target.value.replace('@', '') })}
+              style={{ border: 'none', borderRadius: '0', background: 'transparent' }}
+            />
+          </div>
         </div>
       </div>
 
