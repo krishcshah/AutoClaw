@@ -59,6 +59,22 @@ export function AgentConfig({ data, updateData, nextStep, prevStep }: Props) {
           </p>
         </div>
         <div style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-secondary)' }}>
+            Model Version (Exact String)
+          </label>
+          <input 
+            type="text" 
+            value={data.llmModel}
+            onChange={(e) => updateData({ llmModel: e.target.value })}
+            placeholder="e.g. gemini-3.1-pro, claude-3-5-sonnet-20240620"
+            style={{ marginBottom: '8px' }}
+          />
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            Crucial: Use the most advanced models (like <strong>gemini-3.1-pro</strong>) so OpenClaw doesn't get stuck in failure loops.
+          </p>
+        </div>
+
+        <div style={{ marginBottom: '24px' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
             <input 
               type="checkbox" 

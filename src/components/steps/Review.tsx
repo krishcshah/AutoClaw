@@ -23,6 +23,7 @@ export function Review({ data, nextStep, prevStep }: Props) {
         <ReviewRow label="Compute Engine" value="e2-standard-8 (Heavy Workload VM)" />
         <ReviewRow label="Region" value="us-central1-a (Auto-selected)" />
         <ReviewRow label="LLM Provider" value={data.llmProvider.toUpperCase()} />
+        <ReviewRow label="Target Model" value={data.llmModel} />
         <ReviewRow label="Safety Confirms" value={data.confirmationMode ? 'Enabled' : 'Disabled'} />
         <ReviewRow label="Telegram Integration" value="Enabled (Outbound Listener)" />
       </div>

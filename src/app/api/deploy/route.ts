@@ -42,6 +42,7 @@ cd /opt/openclaw
 echo "Writing environment configurations..."
 cat <<EOF > .env
 LLM_PROVIDER=${data.llmProvider}
+LLM_MODEL=${data.llmModel}
 LLM_API_KEY=${data.llmApiKey}
 TELEGRAM_BOT_TOKEN=${data.telegramToken}
 TELEGRAM_USERNAME=${data.telegramUsername}

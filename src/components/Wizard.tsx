@@ -12,6 +12,7 @@ export type WizardData = {
   gcpProjectId: string;
   gcpAccessToken: string;
   llmProvider: 'openai' | 'anthropic' | 'gemini';
+  llmModel: string;
   llmApiKey: string;
   telegramToken: string;
   telegramUsername: string;
@@ -31,7 +32,8 @@ export function Wizard() {
   const [data, setData] = useState<WizardData>({
     gcpProjectId: '',
     gcpAccessToken: '',
-    llmProvider: 'openai',
+    llmProvider: 'gemini',
+    llmModel: 'gemini-3.1-pro',
     llmApiKey: '',
     telegramToken: '',
     telegramUsername: '',
