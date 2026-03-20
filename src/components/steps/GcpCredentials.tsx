@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { WizardData } from '../Wizard';
-import { UploadCloud, CheckCircle } from 'lucide-react';
+import { CheckCircle, Terminal } from 'lucide-react';
 
 interface Props {
   data: WizardData;
@@ -9,67 +9,20 @@ interface Props {
 }
 
 export function GcpCredentials({ data, updateData, nextStep }: Props) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [error, setError] = useState('');
-  const [isDragOver, setIsDragOver] = useState(false);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
-    let file: File | null = null;
-    
-    if ('dataTransfer' in e) {
-      e.preventDefault();
-      setIsDragOver(false);
-      file = e.dataTransfer.files[0];
-    } else if (e.target.files) {
-      file = e.target.files[0];
-    }
-
-    if (!file) return;
-
-    if (!file.name.endsWith('.json')) {
-      setError('Please upload a valid JSON file.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const content = event.target?.result as string;
-        const parsed = JSON.parse(content);
-        
-        if (!parsed.project_id || !parsed.private_key) {
-          setError('Invalid Service Account JSON. Missing project_id or private_key.');
-          return;
-        }
-
-        setError('');
-        updateData({ 
-          gcpServiceAccount: content,
-          gcpProjectId: parsed.project_id
-        });
-      } catch (err) {
-        setError('Could not parse JSON file.');
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const isComplete = data.gcpProjectId && data.gcpServiceAccount;
+  
+  const isComplete = data.gcpProjectId;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <h2 style={{ fontSize: '1.5rem', color: '#fff' }}>Google Cloud Credentials</h2>
+      <h2 style={{ fontSize: '1.5rem', color: '#fff' }}>Google Cloud Settings</h2>
       <p style={{ marginBottom: '2rem' }}>
-        We need your GCP Service Account to provision Cloud Run and IAM resources. 
-        <a href="https://console.cloud.google.com/iam-admin/serviceaccounts" target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', marginLeft: '4px', textDecoration: 'none' }}>
-           Learn how to create one.
-        </a>
+        We securely use your local Google Cloud CLI credentials to provision resources.
       </p>
 
       <div style={{ flex: 1 }}>
         <div style={{ marginBottom: '24px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-secondary)' }}>
-            Project ID
+            Google Cloud Project ID
           </label>
           <input 
             type="text" 
@@ -79,47 +32,24 @@ export function GcpCredentials({ data, updateData, nextStep }: Props) {
             autoComplete="off"
           />
           <p style={{ fontSize: '0.85rem', marginTop: '6px', color: '#64748b' }}>
-            We'll automatically set defaults like region (us-central1) to minimize input.
+            Enter the exact Google Cloud Project ID where OpenClaw will be deployed.
           </p>
         </div>
 
-        <div style={{ marginBottom: '24px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-secondary)' }}>
-            Service Account Key (.json)
-          </label>
-          
-          <input 
-            type="file" 
-            accept=".json" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            style={{ display: 'none' }} 
-          />
-          
-          <div 
-            className={`file-drop-area ${isDragOver ? 'drag-over' : ''}`}
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-            onDragLeave={() => setIsDragOver(false)}
-            onDrop={handleFileChange}
-          >
-            {data.gcpServiceAccount ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle size={32} color="var(--success)" />
-                <span style={{ color: 'var(--success)', fontWeight: 600 }}>Credentials Loaded</span>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  Click to replace file
-                </span>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                <UploadCloud size={32} color="var(--accent-primary)" />
-                <span style={{ fontWeight: 500, color: '#fff' }}>Click or drop JSON file here</span>
-                <span style={{ fontSize: '0.85rem' }}>Your credentials remain local and are never stored on our servers.</span>
-              </div>
-            )}
+        <div style={{ marginBottom: '24px', padding: '16px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--accent-primary)' }}>
+            <Terminal size={18} />
+            <span style={{ fontWeight: 600 }}>Secure Authentication Setup</span>
           </div>
-          {error && <div className="text-error">{error}</div>}
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+            For maximum security, this wizard does not handle long-lived JSON keys. Instead, please ensure you are authenticated locally with the Google Cloud CLI.
+          </p>
+          <div style={{ background: '#000', padding: '12px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '0.85rem', color: '#a3a3a3', border: '1px solid var(--glass-border)' }}>
+            <span style={{ color: 'var(--accent-primary)' }}>$</span> gcloud auth application-default login
+          </div>
+          <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '12px' }}>
+            Need help? <a href="https://cloud.google.com/sdk/docs/install" target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'none' }}>Install gcloud CLI</a>
+          </p>
         </div>
       </div>
 
