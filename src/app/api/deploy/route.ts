@@ -26,14 +26,17 @@ export async function POST(req: NextRequest) {
     const startupScript = `#!/bin/bash
 exec > /var/log/openclaw-startup.log 2>&1
 echo "Starting OpenClaw Initialization..."
+
+echo "Installing Node.js 22 and dependencies..."
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get update
-sudo apt-get install -y git curl python3 python3-pip python3-venv npm docker.io
+sudo apt-get install -y nodejs git curl docker.io
 
-echo "Installing process manager..."
-sudo npm install -g pm2
+echo "Installing process manager and pnpm..."
+sudo npm install -g pnpm pm2
 
-echo "Cloning OpenClaw repository..."
-git clone https://github.com/khushaldas/openclaw.git /opt/openclaw
+echo "Cloning official OpenClaw repository..."
+git clone https://github.com/openclaw/openclaw.git /opt/openclaw
 cd /opt/openclaw
 
 echo "Writing environment configurations..."
@@ -41,26 +44,14 @@ cat <<EOF > .env
 LLM_PROVIDER=${data.llmProvider}
 LLM_API_KEY=${data.llmApiKey}
 TELEGRAM_BOT_TOKEN=${data.telegramToken}
+TELEGRAM_USERNAME=${data.telegramUsername}
 CONFIRMATION_MODE=${data.confirmationMode}
 EOF
 
-echo "Installing agent dependencies..."
-# For Python-based agents
-if [ -f "requirements.txt" ]; then
-  python3 -m venv venv
-  source venv/bin/activate
-  pip install -r requirements.txt
-  # Start via PM2 representing the python shim
-  pm2 start "python3 main.py" --name openclaw
-# For Node.js-based agents
-elif [ -f "package.json" ]; then
-  npm install
-  npm run build || true
-  pm2 start npm --name openclaw -- start
-else
-  # Fallback execution attempt
-  echo "Unknown project structure inside /opt/openclaw"
-fi
+echo "Building and starting OpenClaw agent..."
+pnpm install
+pnpm run build || true
+pm2 start pnpm --name openclaw -- start
 
 echo "Saving process list so OpenClaw survives reboots..."
 pm2 save
