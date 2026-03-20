@@ -52,11 +52,17 @@ EOF
 echo "Building and starting OpenClaw agent..."
 pnpm install
 pnpm run build || true
-pm2 start pnpm --name openclaw -- start
+
+echo "Configuring PM2 environment..."
+export HOME=/root
+export PM2_HOME=/root/.pm2
+
+echo "Launching OpenClaw Daemon..."
+pm2 start scripts/run-node.mjs --name openclaw -- gateway
 
 echo "Saving process list so OpenClaw survives reboots..."
 pm2 save
-pm2 startup | tail -n 1 | bash
+env PATH=$PATH:/usr/bin pm2 startup systemd -u root --hp /root
 
 echo "OpenClaw VM initialization complete."
 `;
